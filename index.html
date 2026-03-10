@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stripe Dashboard - UberEats Payments</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f6f9fc;
+  color: #1a1f36;
+}
+
+/* Login Page */
+.login-page {
+  display: none;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #5469d4 0%, #635bff 100%);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-page.active {
+  display: flex;
+}
+
+.login-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 420px;
+  padding: 48px 40px;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #635bff;
+}
+
+.login-logo p {
+  font-size: 14px;
+  color: #8898aa;
+  margin-top: 8px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.form-group input {
+  padding: 12px 14px;
+  border: 1px solid #e3e8ee;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #635bff;
+  box-shadow: 0 0 0 3px rgba(99, 91, 255, 0.1);
+}
+
+.login-btn {
+  background: #635bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.login-btn:hover {
+  background: #5469d4;
+}
+
+/* Main App */
+.app-container {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.app-container.active {
+  display: flex;
+}
+
+/* Header */
+.header {
+  background: #fff;
+  border-bottom: 1px solid #e3e8ee;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.header-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #635bff;
+}
+
+.header-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-item {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b7c93;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background: #f6f9fc;
+  color: #1a1f36;
+}
+
+.nav-item.active {
+  background: #f6f9fc;
+  color: #635bff;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #6b7c93;
+}
+
+.logout-btn {
+  background: #f6f9fc;
+  border: 1px solid #e3e8ee;
+  color: #1a1f36;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: #e3e8ee;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  padding: 24px;
+  gap: 24px;
+}
+
+/* Payments List Panel */
+.payments-panel {
+  width: 400px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e3e8ee;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 130px);
+}
+
+.payments-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e3e8ee;
+}
+
+.payments-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.payments-count {
+  font-size: 13px;
+  color: #6b7c93;
+  margin-top: 4px;
+}
+
+.payments-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.payment-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f6f9fc;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.payment-item:hover {
+  background: #f6f9fc;
+}
+
+.payment-item.active {
+  background: #f0f4ff;
+  border-left: 3px solid #635bff;
+}
+
+.payment-id {
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  color: #635bff;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.payment-merchant {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1f36;
+  margin-bottom: 6px;
+}
+
+.payment-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 8px;
+}
+
+.payment-meta {
+  font-size: 12px;
+  color: #6b7c93;
+  display: flex;
+  gap: 12px;
+}
+
+.payment-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.status-succeeded {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-pending {
+  background: #fff8e1;
+  color: #f57c00;
+}
+
+.status-failed {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Payment Detail Panel */
+.payment-detail-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e3e8ee;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 130px);
+}
+
+.payment-detail-header {
+  padding: 24px;
+  border-bottom: 1px solid #e3e8ee;
+}
+
+.payment-detail-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 8px;
+}
+
+.payment-detail-subtitle {
+  font-size: 14px;
+  color: #6b7c93;
+  font-family: 'Courier New', monospace;
+}
+
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.detail-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #6b7c93;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #1a1f36;
+  font-weight: 500;
+}
+
+.detail-value.code {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  background: #f6f9fc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #f6f9fc;
+  border-radius: 6px;
+  border-left: 3px solid #635bff;
+}
+
+.timeline-icon {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.timeline-content {
+  flex: 1;
+}
+
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 4px;
+}
+
+.timeline-text {
+  font-size: 13px;
+  color: #6b7c93;
+  margin-bottom: 6px;
+}
+
+.timeline-timestamp {
+  font-size: 12px;
+  color: #8898aa;
+}
+
+.metadata-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f6f9fc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.metadata-table tr {
+  border-bottom: 1px solid #e3e8ee;
+}
+
+.metadata-table tr:last-child {
+  border-bottom: none;
+}
+
+.metadata-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.metadata-table td:first-child {
+  color: #6b7c93;
+  font-weight: 500;
+  width: 40%;
+}
+
+.metadata-table td:last-child {
+  color: #1a1f36;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8898aa;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state-text {
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div class="login-page active" id="loginPage">
+  <div class="login-container">
+    <div class="login-logo">
+      <h1>Stripe</h1>
+      <p>UberEats Payment Dashboard</p>
+    </div>
+    <form class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="username">Email</label>
+        <input type="text" id="username" placeholder="finance@ubereats.com" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+      </div>
+      <button type="submit" class="login-btn">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app-container" id="appContainer">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-logo">Stripe</div>
+      <div class="header-nav">
+        <div class="nav-item active">Payments</div>
+        <div class="nav-item">Disputes</div>
+        <div class="nav-item">Reports</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="userEmail">finance@ubereats.com</span>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Payments List -->
+    <div class="payments-panel">
+      <div class="payments-header">
+        <h2>Recent Payments</h2>
+        <div class="payments-count">8 payments</div>
+      </div>
+      <div class="payments-list" id="paymentsList">
+        <!-- Payments will be rendered here -->
+      </div>
+    </div>
+
+    <!-- Payment Detail -->
+    <div class="payment-detail-panel">
+      <div class="payment-detail-header">
+        <div class="payment-detail-title" id="paymentTitle">Select a payment to view details</div>
+        <div class="payment-detail-subtitle" id="paymentSubtitle"></div>
+      </div>
+      
+      <div class="detail-content" id="detailContent">
+        <div class="empty-state">
+          <div class="empty-state-icon">💳</div>
+          <div class="empty-state-text">Select a payment from the list to view details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Payment Data - 3 real + 5 dummy
+const paymentsData = {
+  'pi_3QwZ4fK2hF7uLmN0': {
+    id: 'pi_3QwZ4fK2hF7uLmN0',
+    merchant: 'Burger & Beyond',
+    amount: '$2,847.50',
+    amountCents: 284750,
+    status: 'succeeded',
+    created: '2026-03-09 14:32',
+    method: 'Visa •••• 4242',
+    customer: 'cus_BurgerBeyond2023',
+    description: 'Weekly commission payment - 47 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment processed successfully', timestamp: '2026-03-09 14:32:45' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created for weekly commission', timestamp: '2026-03-09 14:32:12' }
+    ],
+    metadata: {
+      merchant_id: 'merch_bb_4783',
+      commission_period: 'Mar 2-8, 2026',
+      order_count: '47',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QxA2bK2hF7uLmN1': {
+    id: 'pi_3QxA2bK2hF7uLmN1',
+    merchant: 'Taco Fiesta',
+    amount: '$1,245.00',
+    amountCents: 124500,
+    status: 'succeeded',
+    created: '2026-03-10 09:15',
+    method: 'MasterCard •••• 5555',
+    customer: 'cus_TacoFiesta2023',
+    description: 'Weekly commission payment - 23 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment processed successfully', timestamp: '2026-03-10 09:15:23' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created for weekly commission', timestamp: '2026-03-10 09:15:01' }
+    ],
+    metadata: {
+      merchant_id: 'merch_tf_5921',
+      commission_period: 'Mar 3-9, 2026',
+      order_count: '23',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QxB8dK2hF7uLmN2': {
+    id: 'pi_3QxB8dK2hF7uLmN2',
+    merchant: 'Capital Grille',
+    amount: '$4,892.00',
+    amountCents: 489200,
+    status: 'pending',
+    created: '2026-03-10 11:47',
+    method: 'Visa •••• 8888',
+    customer: 'cus_CapitalGrille2022',
+    description: 'Disputed commission - under review',
+    currency: 'USD',
+    timeline: [
+      { icon: '⏳', title: 'Payment pending', text: 'Awaiting confirmation from merchant', timestamp: '2026-03-10 11:47:12' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created - flagged for review', timestamp: '2026-03-10 11:47:05' }
+    ],
+    metadata: {
+      merchant_id: 'merch_cg_2834',
+      commission_period: 'Mar 1-9, 2026',
+      order_count: '8',
+      platform: 'ubereats',
+      category: 'commission',
+      dispute_status: 'under_review'
+    }
+  },
+  // Dummy payments
+  'pi_3QvX1aK2hF7uLmN3': {
+    id: 'pi_3QvX1aK2hF7uLmN3',
+    merchant: 'Pizza Paradise',
+    amount: '$1,567.00',
+    amountCents: 156700,
+    status: 'succeeded',
+    created: '2026-03-08 10:22',
+    method: 'Visa •••• 1234',
+    customer: 'cus_PizzaParadise2023',
+    description: 'Weekly commission payment - 32 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment completed', timestamp: '2026-03-08 10:22:34' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created', timestamp: '2026-03-08 10:22:10' }
+    ],
+    metadata: {
+      merchant_id: 'merch_pp_3456',
+      commission_period: 'Mar 1-7, 2026',
+      order_count: '32',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QvY2bK2hF7uLmN4': {
+    id: 'pi_3QvY2bK2hF7uLmN4',
+    merchant: 'Sushi Station',
+    amount: '$2,134.00',
+    amountCents: 213400,
+    status: 'succeeded',
+    created: '2026-03-08 14:55',
+    method: 'Amex •••• 1001',
+    customer: 'cus_SushiStation2023',
+    description: 'Weekly commission payment - 41 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment completed', timestamp: '2026-03-08 14:55:45' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created', timestamp: '2026-03-08 14:55:22' }
+    ],
+    metadata: {
+      merchant_id: 'merch_ss_7812',
+      commission_period: 'Mar 1-7, 2026',
+      order_count: '41',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QwZ1cK2hF7uLmN5': {
+    id: 'pi_3QwZ1cK2hF7uLmN5',
+    merchant: 'Thai Basil',
+    amount: '$892.00',
+    amountCents: 89200,
+    status: 'succeeded',
+    created: '2026-03-09 08:30',
+    method: 'Visa •••• 6789',
+    customer: 'cus_ThaiBasil2023',
+    description: 'Weekly commission payment - 18 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment completed', timestamp: '2026-03-09 08:30:56' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created', timestamp: '2026-03-09 08:30:34' }
+    ],
+    metadata: {
+      merchant_id: 'merch_tb_4523',
+      commission_period: 'Mar 2-8, 2026',
+      order_count: '18',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QxC3dK2hF7uLmN6': {
+    id: 'pi_3QxC3dK2hF7uLmN6',
+    merchant: 'Bistro 24',
+    amount: '$1,678.00',
+    amountCents: 167800,
+    status: 'succeeded',
+    created: '2026-03-10 13:20',
+    method: 'MasterCard •••• 2222',
+    customer: 'cus_Bistro24_2023',
+    description: 'Weekly commission payment - 29 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment completed', timestamp: '2026-03-10 13:20:43' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created', timestamp: '2026-03-10 13:20:15' }
+    ],
+    metadata: {
+      merchant_id: 'merch_b24_6721',
+      commission_period: 'Mar 3-9, 2026',
+      order_count: '29',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  },
+  'pi_3QxD4eK2hF7uLmN7': {
+    id: 'pi_3QxD4eK2hF7uLmN7',
+    merchant: 'Curry House',
+    amount: '$1,956.00',
+    amountCents: 195600,
+    status: 'succeeded',
+    created: '2026-03-10 15:05',
+    method: 'Visa •••• 9999',
+    customer: 'cus_CurryHouse2023',
+    description: 'Weekly commission payment - 35 orders',
+    currency: 'USD',
+    timeline: [
+      { icon: '✅', title: 'Payment succeeded', text: 'Payment completed', timestamp: '2026-03-10 15:05:29' },
+      { icon: '💳', title: 'Payment created', text: 'Payment intent created', timestamp: '2026-03-10 15:05:08' }
+    ],
+    metadata: {
+      merchant_id: 'merch_ch_8934',
+      commission_period: 'Mar 3-9, 2026',
+      order_count: '35',
+      platform: 'ubereats',
+      category: 'commission'
+    }
+  }
+};
+
+// Login handling
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  if (username === 'finance@ubereats.com' && password === 'UberEats2026!') {
+    document.getElementById('loginPage').classList.remove('active');
+    document.getElementById('appContainer').classList.add('active');
+    renderPaymentsList();
+  } else {
+    alert('Invalid credentials. Use: finance@ubereats.com / UberEats2026!');
+  }
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  document.getElementById('appContainer').classList.remove('active');
+  document.getElementById('loginPage').classList.add('active');
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+});
+
+// Render payments list
+function renderPaymentsList() {
+  const paymentsList = document.getElementById('paymentsList');
+  paymentsList.innerHTML = '';
+  
+  // Sort by created date descending (newest first)
+  const sortedPayments = Object.values(paymentsData).sort((a, b) => 
+    new Date(b.created) - new Date(a.created)
+  );
+  
+  sortedPayments.forEach((payment, index) => {
+    const paymentItem = document.createElement('div');
+    paymentItem.className = 'payment-item';
+    if (index === 0) paymentItem.classList.add('active');
+    paymentItem.dataset.paymentId = payment.id;
+    
+    const statusClass = payment.status;
+    
+    paymentItem.innerHTML = `
+      <div class="payment-id">${payment.id}</div>
+      <div class="payment-merchant">${payment.merchant}</div>
+      <div class="payment-amount">${payment.amount}</div>
+      <div class="payment-meta">
+        <span>${payment.method}</span>
+        <span>${payment.created}</span>
+      </div>
+      <span class="payment-status status-${statusClass}">${payment.status}</span>
+    `;
+    
+    paymentItem.addEventListener('click', function() {
+      document.querySelectorAll('.payment-item').forEach(item => item.classList.remove('active'));
+      this.classList.add('active');
+      renderPaymentDetail(payment.id);
+    });
+    
+    paymentsList.appendChild(paymentItem);
+  });
+  
+  // Load first payment by default
+  if (sortedPayments.length > 0) {
+    renderPaymentDetail(sortedPayments[0].id);
+  }
+}
+
+// Render payment detail
+function renderPaymentDetail(paymentId) {
+  const payment = paymentsData[paymentId];
+  if (!payment) return;
+  
+  // Update header
+  document.getElementById('paymentTitle').textContent = `${payment.merchant} - ${payment.amount}`;
+  document.getElementById('paymentSubtitle').textContent = payment.id;
+  
+  // Build timeline HTML
+  const timelineHTML = payment.timeline.map(item => `
+    <div class="timeline-item">
+      <div class="timeline-icon">${item.icon}</div>
+      <div class="timeline-content">
+        <div class="timeline-title">${item.title}</div>
+        <div class="timeline-text">${item.text}</div>
+        <div class="timeline-timestamp">${item.timestamp}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Build metadata table
+  const metadataRows = Object.entries(payment.metadata).map(([key, value]) => `
+    <tr>
+      <td>${key.replace(/_/g, ' ')}</td>
+      <td>${value}</td>
+    </tr>
+  `).join('');
+  
+  // Render complete detail
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-section">
+      <div class="section-title">Payment Details</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Payment ID</div>
+          <div class="detail-value code">${payment.id}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Status</div>
+          <div class="detail-value">${payment.status}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Amount</div>
+          <div class="detail-value">${payment.amount} ${payment.currency}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Created</div>
+          <div class="detail-value">${payment.created}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Merchant</div>
+          <div class="detail-value">${payment.merchant}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Customer ID</div>
+          <div class="detail-value code">${payment.customer}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Payment Method</div>
+          <div class="detail-value">${payment.method}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Description</div>
+          <div class="detail-value">${payment.description}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <div class="section-title">Timeline</div>
+      <div class="timeline">
+        ${timelineHTML}
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <div class="section-title">Metadata</div>
+      <table class="metadata-table">
+        ${metadataRows}
+      </table>
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>
